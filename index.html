@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Trại Gà</title>
+    <title>Quản Lý Trại Gà - Đồng Bộ Đám Mây</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #2e7d32; --accent: #f9a825; --danger: #d32f2f; --bg: #f4f7f6; --text: #333; }
@@ -18,11 +18,12 @@
         .tab-content { display: none; max-width: 1100px; margin: 20px auto; padding: 0 15px; }
         .tab-content.active { display: block; }
         
-        .admin-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .admin-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; }
         .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-item { display: flex; flex-direction: column; }
         input, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size:1em; }
         .submit-btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size:1em;}
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
         
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
@@ -30,13 +31,18 @@
         
         .cart-box { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--primary); }
         .cart-item { display: flex; justify-content: space-between; background: white; padding: 8px; margin-top: 5px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* Hiệu ứng xoay khi tải dữ liệu */
+        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 999; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.2em; }
     </style>
 </head>
 <body>
 
+    <div id="loading-overlay">⏳ Đang đồng bộ dữ liệu với đám mây...</div>
+
     <header>
         <h1 style="margin:0;">🐔 Trại Gà Hạnh Phúc</h1>
-        <p style="margin:5px 0 0 0; opacity:0.9;">Hệ thống Quản lý Bán hàng & Sổ nợ</p>
+        <p style="margin:5px 0 0 0; opacity:0.9;">Hệ thống đồng bộ dữ liệu đám mây trực tuyến</p>
     </header>
 
     <div class="nav-tabs">
@@ -72,7 +78,7 @@
                     <div class="form-item"><label>Thanh Toán:</label><select id="order-status"><option value="paid">✅ Đã Thu Đủ</option><option value="debt">🚨 Còn Nợ</option></select></div>
                 </div>
                 <div id="order-total" style="font-weight: 900; margin: 15px 0; color: var(--danger); font-size: 1.4em; text-align:center;">TỔNG ĐƠN: 0đ</div>
-                <button type="submit" class="submit-btn" style="width:100%; font-size:1.1em; padding:15px;">💾 CHỐT ĐƠN & LƯU SỔ</button>
+                <button type="submit" id="btn-submit-order" class="submit-btn" style="width:100%; font-size:1.1em; padding:15px;">💾 CHỐT ĐƠN & LƯU ĐÁM MÂY</button>
             </form>
         </div>
         
@@ -96,7 +102,7 @@
                     <select id="new-unit"><option value="Con">Con</option><option value="Kg">Kg</option></select>
                     <input type="number" id="new-price" placeholder="Giá tiền" required>
                 </div>
-                <button type="submit" class="submit-btn" style="background: var(--accent);">➕ Thêm Vào Danh Sách</button>
+                <button type="submit" id="btn-add-item" class="submit-btn" style="background: var(--accent);">➕ Thêm Vào Danh Sách</button>
             </form>
             <table style="margin-top: 20px;">
                 <thead><tr><th>Tên loại gà</th><th>Đơn vị tính</th><th>Giá bán</th><th>Thao tác</th></tr></thead>
@@ -106,9 +112,56 @@
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('chickenItems')) || [{id:1, name:"Gà Ta", unit:"Kg", price:150000}, {id:2, name:"Gà Ác", unit:"Con", price:80000}];
-        let orders = JSON.parse(localStorage.getItem('chickenOrders')) || [];
+    
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw58tUv8YzZXWTG7TLe_6d0ZPjzKUB2wTr7bTe3pQlHnV2SWP13xNJzwZKtFFhO6XGG/exec";
+        
+
+        let items = [];
+        let orders = [];
         let currentCart = [];
+
+        // Hàm gọi API kết nối tới Google Sheets công khai không lo lỗi CORS
+        async function apiCall(action, extraData = {}) {
+            showLoading(true);
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, ...extraData })
+                });
+                const res = await response.json();
+                return res;
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi kết nối đám mây! Vui lòng kiểm tra lại mạng internet.");
+                return null;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(status) {
+            document.getElementById('loading-overlay').style.display = status ? 'flex' : 'none';
+        }
+
+        async function initData() {
+            const res = await apiCall("getData");
+            if(res) {
+                items = res.items || [];
+                orders = res.orders || [];
+                
+                // Tạo dữ liệu mồi nếu Trang tính của bạn hoàn toàn trống trơn lần đầu tiên
+                if(items.length === 0 && orders.length === 0) {
+                    await apiCall("addItem", { data: {id:1, name:"Gà Ta", unit:"Kg", price:150000} });
+                    await apiCall("addItem", { data: {id:2, name:"Gà Ác", unit:"Con", price:80000} });
+                    return initData();
+                }
+
+                updateOptions(); 
+                renderShop();
+                renderOrders();
+                renderSettings();
+            }
+        }
 
         function switchTab(t) {
             document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
@@ -116,9 +169,6 @@
             if(btn) btn.classList.add('active');
             const content = document.getElementById(`tab-${t}`);
             if(content) content.classList.add('active');
-            if(t === 'admin') renderOrders();
-            if(t === 'settings') renderSettings();
-            if(t === 'shop') renderShop();
         }
 
         function addToCart() {
@@ -133,16 +183,19 @@
         function renderCartUI() {
             const list = document.getElementById('cart-list');
             if(currentCart.length === 0) { list.innerHTML = "<i>Chưa có món nào...</i>"; document.getElementById('order-total').innerText = "TỔNG ĐƠN: 0đ"; return; }
-            list.innerHTML = currentCart.map((c, i) => `<div class="cart-item"><span><b>${c.name}</b> (${c.qty} ${c.unit})</span><span>${c.total.toLocaleString()}đ <button onclick="currentCart.splice(${i},1);renderCartUI();" style="color:red;border:none;background:none;cursor:pointer;font-weight:bold;">X</button></span></div>`).join('');
+            list.innerHTML = currentCart.map((c, i) => `<div class="cart-item"><span><b>${c.name}</b> (${c.qty} ${c.unit})</span><span>${Number(c.total).toLocaleString()}đ <button onclick="currentCart.splice(${i},1);renderCartUI();" style="color:red;border:none;background:none;cursor:pointer;font-weight:bold;">X</button></span></div>`).join('');
             const sum = currentCart.reduce((a, b) => a + b.total, 0);
             document.getElementById('order-total').innerText = `TỔNG ĐƠN: ${sum.toLocaleString()}đ`;
         }
 
-        function saveOrder(e) {
+        async function saveOrder(e) {
             e.preventDefault();
-            const cust = document.getElementById('order-cust').value;
+            const cust = document.getElementById('order-cust').value.trim();
             if(!cust || currentCart.length === 0) return alert("Vui lòng nhập tên khách và chọn gà!");
-            orders.push({
+            
+            document.getElementById('btn-submit-order').disabled = true;
+            
+            const newOrder = {
                 id: Date.now(),
                 date: document.getElementById('order-date').value,
                 customer: cust,
@@ -150,37 +203,92 @@
                 qty_unit: currentCart.map(c => `${c.qty} ${c.unit}`).join('<br>'),
                 total: currentCart.reduce((a, b) => a + b.total, 0),
                 status: document.getElementById('order-status').value
-            });
-            localStorage.setItem('chickenOrders', JSON.stringify(orders));
-            currentCart = []; renderCartUI(); document.getElementById('order-cust').value = ''; renderOrders();
-            alert("Đã chốt đơn thành công!");
+            };
+
+            const success = await apiCall("saveOrder", { data: newOrder });
+            if(success) {
+                currentCart = []; 
+                renderCartUI(); 
+                document.getElementById('order-cust').value = ''; 
+                await initData();
+                alert("Đã chốt đơn và đồng bộ lên Google Sheets thành công!");
+            }
+            document.getElementById('btn-submit-order').disabled = false;
         }
 
         function renderOrders() {
             const body = document.getElementById('order-table-body');
-            orders.sort((a,b) => new Date(b.date) - new Date(a.date));
-            body.innerHTML = orders.map(o => `
+            // Sắp xếp đơn mới lên đầu
+            orders.sort((a,b) => b.id - a.id);
+            body.innerHTML = orders.map(o => {
+                let dateStr = String(o.date);
+                if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+                let formattedDate = dateStr.split('-').reverse().join('/');
+                
+                return `
                 <tr class="${o.status === 'debt' ? 'row-debt' : ''}">
-                    <td>${o.date.split('-').reverse().join('/')}</td>
+                    <td>${formattedDate}</td>
                     <td><b>${o.customer}</b></td>
                     <td>${o.itemName}</td>
-                    <td>${o.qty_unit || (o.qty + " " + o.unit)}</td>
-                    <td><b>${o.total.toLocaleString()}đ</b></td>
+                    <td>${o.qty_unit}</td>
+                    <td><b>${Number(o.total).toLocaleString()}đ</b></td>
                     <td><button onclick="togglePay(${o.id})" style="border:none;border-radius:5px;padding:6px;background:${o.status==='paid'?'#2e7d32':'#d32f2f'};color:white;cursor:pointer;width:80px;font-weight:bold;">${o.status==='paid'?'Đã thu':'NỢ'}</button></td>
                     <td><button onclick="deleteOrder(${o.id})" style="border:none;color:red;background:none;cursor:pointer;font-weight:bold;font-size:1.2em;">×</button></td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
         }
 
-        function togglePay(id) { orders = orders.map(o => { if(o.id === id) o.status = (o.status==='paid'?'debt':'paid'); return o; }); localStorage.setItem('chickenOrders', JSON.stringify(orders)); renderOrders(); }
-        function deleteOrder(id) { if(confirm("Bạn có chắc muốn xóa đơn này khỏi sổ?")) { orders = orders.filter(o => o.id !== id); localStorage.setItem('chickenOrders', JSON.stringify(orders)); renderOrders(); } }
-        function renderShop() { document.getElementById('shop-list').innerHTML = items.map(i => `<div style="background:white;padding:20px;border-radius:15px;width:220px;text-align:center;box-shadow:0 5px 10px rgba(0,0,0,0.05);border-top:5px solid var(--primary);"><h2 style="margin:0;">${i.name}</h2><p style="color:var(--danger);font-weight:900;font-size:1.4em;margin:10px 0;">${i.price.toLocaleString()}đ</p><p style="margin:0;color:#666;">Tính theo: <b>${i.unit}</b></p></div>`).join(''); }
-        function addItem(e) { e.preventDefault(); items.push({ id: Date.now(), name: document.getElementById('new-name').value, unit: document.getElementById('new-unit').value, price: parseInt(document.getElementById('new-price').value) }); localStorage.setItem('chickenItems', JSON.stringify(items)); renderSettings(); updateOptions(); alert("Đã thêm thành công!"); }
-        function renderSettings() { document.getElementById('settings-table-body').innerHTML = items.map(i => `<tr><td><b>${i.name}</b></td><td>${i.unit}</td><td>${i.price.toLocaleString()}đ</td><td><button onclick="deleteItem(${i.id})" style="color:white;background:red;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Xóa</button></td></tr>`).join(''); }
-        function deleteItem(id) { if(confirm("Xóa loại gà này?")) { items = items.filter(i => i.id !== id); localStorage.setItem('chickenItems', JSON.stringify(items)); renderSettings(); updateOptions(); } }
-        function updateOptions() { document.getElementById('order-type').innerHTML = items.map(i => `<option value="${i.id}">${i.name} (${i.price.toLocaleString()}đ)</option>`).join(''); }
+        async function togglePay(id) { 
+            await apiCall("togglePay", { id: id }); 
+            await initData(); 
+        }
+        
+        async function deleteOrder(id) { 
+            if(confirm("Bạn có chắc muốn xóa đơn này khỏi sổ đám mây?")) { 
+                await apiCall("deleteOrder", { id: id }); 
+                await initData(); 
+            } 
+        }
+        
+        function renderShop() { 
+            document.getElementById('shop-list').innerHTML = items.map(i => `<div style="background:white;padding:20px;border-radius:15px;width:220px;text-align:center;box-shadow:0 5px 10px rgba(0,0,0,0.05);border-top:5px solid var(--primary);"><h2 style="margin:0;">${i.name}</h2><p style="color:var(--danger);font-weight:900;font-size:1.4em;margin:10px 0;">${Number(i.price).toLocaleString()}đ</p><p style="margin:0;color:#666;">Tính theo: <b>${i.unit}</b></p></div>`).join(''); 
+        }
+        
+        async function addItem(e) { 
+            e.preventDefault(); 
+            document.getElementById('btn-add-item').disabled = true;
+            const newItem = { 
+                id: Date.now(), 
+                name: document.getElementById('new-name').value, 
+                unit: document.getElementById('new-unit').value, 
+                price: parseInt(document.getElementById('new-price').value) 
+            }; 
+            await apiCall("addItem", { data: newItem });
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-price').value = '';
+            await initData();
+            document.getElementById('btn-add-item').disabled = false;
+            alert("Đã thêm mặt hàng lên đám mây!");
+        }
+        
+        function renderSettings() { 
+            document.getElementById('settings-table-body').innerHTML = items.map(i => `<tr><td><b>${i.name}</b></td><td>${i.unit}</td><td>${Number(i.price).toLocaleString()}đ</td><td><button onclick="deleteItem(${i.id})" style="color:white;background:red;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Xóa</button></td></tr>`).join(''); 
+        }
+        
+        async function deleteItem(id) { 
+            if(confirm("Xóa loại gà này trên hệ thống đám mây?")) { 
+                await apiCall("deleteItem", { id: id }); 
+                await initData(); 
+            } 
+        }
+        
+        function updateOptions() { 
+            document.getElementById('order-type').innerHTML = items.map(i => `<option value="${i.id}">${i.name} (${Number(i.price).toLocaleString()}đ)</option>`).join(''); 
+        }
 
+        // Khởi động hệ thống
         document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
-        updateOptions(); renderShop();
+        initData();
     </script>
 </body>
 </html>
