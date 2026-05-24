@@ -3,185 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Trại Gà Toàn Diện</title>
+    <title>Quản Lý Trại Gà Thông Minh</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2e7d32;
-            --accent: #f9a825;
-            --danger: #d32f2f;
-            --danger-bg: #ffebee;
-            --bg: #f4f7f6;
-            --text: #333;
+            --primary: #2e7d32; --accent: #f9a825; --danger: #d32f2f;
+            --danger-bg: #ffebee; --bg: #f4f7f6; --text: #333;
         }
-
         * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
         body { background-color: var(--bg); margin: 0; color: var(--text); padding-bottom: 60px; }
-        
         header {
             background: linear-gradient(135deg, #4caf50, #2e7d32);
-            color: white; text-align: center; padding: 40px 20px;
+            color: white; text-align: center; padding: 30px 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        header h1 { margin: 0; font-weight: 900; }
-
-        /* Thanh điều hướng giữa Khách và Chủ Trại */
-        .nav-tabs {
-            display: flex; justify-content: center; background: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); sticky: top;
-        }
+        .nav-tabs { display: flex; justify-content: center; background: #fff; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tab-btn {
-            padding: 15px 25px; border: none; background: none;
-            font-size: 1.1em; font-weight: bold; cursor: pointer; color: #666;
-            border-bottom: 4px solid transparent; transition: 0.3s;
+            padding: 15px 20px; border: none; background: none; font-size: 1em; font-weight: bold;
+            cursor: pointer; color: #666; border-bottom: 4px solid transparent; transition: 0.3s;
         }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-        .tab-content { display: none; max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .tab-content { display: none; max-width: 1100px; margin: 25px auto; padding: 0 15px; }
         .tab-content.active { display: block; }
 
-        /* CSS PHẦN CỬA HÀNG (KHÁCH XEM) */
-        .grid-layout { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
-        .card {
-            background: white; border-radius: 20px; padding: 30px 20px; width: 310px;
-            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden;
-        }
-        .icon { font-size: 4.5em; margin: 10px 0; }
-        .price-tag { color: var(--danger); font-size: 1.6em; font-weight: 900; margin: 15px 0; }
-        .shop-btn {
-            background-color: var(--accent); color: white; border: none; padding: 12px;
-            border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer;
-        }
-
-        /* CSS PHẦN QUẢN LÝ (CHỦ TRẠI) */
-        .admin-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .admin-box h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        
-        /* Form nhập lịch giao hàng */
-        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        /* Style cho phần Quản lý */
+        .admin-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .admin-box h2 { margin-top: 0; color: var(--primary); font-size: 1.3em; border-left: 5px solid var(--primary); padding-left: 10px; }
+        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-item { display: flex; flex-direction: column; }
         .form-item label { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
-        .form-item input, .form-item select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; }
         
-        .calc-preview { background: #e8f5e9; padding: 12px; border-radius: 8px; font-weight: bold; color: var(--primary); margin: 10px 0; font-size: 1.1em; }
-        .submit-btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1em; }
+        .submit-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .calc-preview { background: #fffde7; padding: 15px; border-radius: 8px; border: 1px dashed var(--accent); margin: 10px 0; font-weight: bold; text-align: center; }
 
-        /* Dashboard thống kê số tiền trong ngày */
-        .dashboard-today { background: #fff8e1; border-left: 5px solid var(--accent); padding: 15px; border-radius: 8px; font-size: 1.2em; font-weight: bold; margin-bottom: 20px; }
+        /* Bảng dữ liệu */
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.95em; }
+        th { background: #f8f9fa; }
+        .row-debt { background-color: var(--danger-bg); color: var(--danger); font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 5px; font-size: 0.8em; color: white; font-weight: bold; }
+        .bg-paid { background: var(--primary); }
+        .bg-debt { background: var(--danger); }
 
-        /* Bảng danh sách sổ nợ và giao hàng */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f1f1f1; font-weight: bold; }
+        /* Store Cards */
+        .grid-layout { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; border-radius: 20px; padding: 20px; width: 280px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .price-tag { color: var(--danger); font-size: 1.4em; font-weight: 900; margin: 10px 0; }
         
-        /* Nổi bật dòng còn nợ */
-        .row-debt { background-color: var(--danger-bg) !important; color: var(--danger); font-weight: 600; }
-        .badge-debt { background: var(--danger); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.85em; }
-        .badge-paid { background: var(--primary); color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.85em; }
-
-        .action-btn { background: #0288d1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
-        .del-btn { background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; margin-left: 5px; }
-
-        footer { text-align: center; padding: 20px; color: #888; font-size: 0.9em; }
+        .del-btn { background: #ffeded; color: #d32f2f; border: 1px solid #ffcdd2; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; }
+        .status-btn { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🐔 Hệ Thống Trại Gà Hạnh Phúc</h1>
-        <p>Quản lý chăn nuôi & Kinh doanh thông minh</p>
+        <h1>🐔 Trại Gà Hạnh Phúc</h1>
+        <p>Hệ thống Quản lý Bán lẻ & Công nợ</p>
     </header>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('shop')">🛒 Cửa Hàng (Khách xem)</button>
-        <button class="tab-btn" onclick="switchTab('admin')">📊 Lịch Giao & Sổ Nợ (Chủ trại)</button>
-        <button class="tab-btn" onclick="switchTab('settings')">⚙️ Cấu Hình Giá Gà</button>
+        <button class="tab-btn active" onclick="switchTab('shop')">🏠 Cửa Hàng</button>
+        <button class="tab-btn" onclick="switchTab('admin')">📋 Giao Hàng & Nợ</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️ Cấu Hình Gà</button>
     </div>
 
     <div id="tab-shop" class="tab-content active">
-        <div class="grid-layout">
-            <div class="card">
-                <div class="icon"> Rooster 🐓</div>
-                <h3>Gà Ta Thả Vườn</h3>
-                <p>Thịt săn chắc, da vàng óng, nuôi hoàn toàn tự nhiên.</p>
-                <div class="price-tag" id="view-price-ga-ta">150.000đ / kg</div>
-                <button class="shop-btn" onclick="alert('Vui lòng liên hệ chủ trại qua SĐT để đặt gà bắt tại vườn!')">🛒 Đặt Mua</button>
+        <div id="shop-list" class="grid-layout">
             </div>
-            <div class="card">
-                <div class="icon">Chick 🐥</div>
-                <h3>Gà Ác Tiềm</h3>
-                <p>Size chuẩn dùng làm thuốc bắc bồi bổ sức khỏe rất tốt.</p>
-                <div class="price-tag" id="view-price-ga-ac">80.000đ / con</div>
-                <button class="shop-btn" onclick="alert('Vui lòng liên hệ chủ trại để đặt trước gà ác!')">🛒 Đặt Mua</button>
-            </div>
-        </div>
     </div>
 
     <div id="tab-admin" class="tab-content">
         <div class="admin-box">
-            <h2>📝 Lên Lịch Giao Gà & Tính Tiền Nhanh</h2>
-            <form id="delivery-form" onsubmit="saveDelivery(event)">
+            <h2>📝 Lên Lịch Giao Hàng</h2>
+            <form onsubmit="saveOrder(event)">
                 <div class="form-group">
                     <div class="form-item">
-                        <label>Tên Người Nhận (Khách hàng):</label>
-                        <input type="text" id="cust-name" required placeholder="Ví dụ: Anh Ba Gà Chợ">
+                        <label>Tên Khách Hàng:</label>
+                        <input type="text" id="order-cust" required placeholder="Ví dụ: Chú Bảy">
                     </div>
                     <div class="form-item">
-                        <label>Ngày Giao Hàng:</label>
-                        <input type="date" id="delivery-date" required>
+                        <label>Ngày Giao:</label>
+                        <input type="date" id="order-date" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <div class="form-item">
                         <label>Chọn Loại Gà:</label>
-                        <select id="chicken-type" onchange="autoCalculateTotal()">
-                            </select>
+                        <select id="order-type" onchange="updateUnitDisplay()"></select>
                     </div>
                     <div class="form-item">
-                        <label>Số Lượng Đặt (Con / Kg):</label>
-                        <input type="number" id="quantity" value="1" min="1" oninput="autoCalculateTotal()" required>
+                        <label id="label-qty">Số lượng (Con):</label>
+                        <input type="number" id="order-qty" step="0.1" value="1" oninput="calculateTotal()">
                     </div>
                     <div class="form-item">
-                        <label>Trạng Thái Thu Tiền:</label>
-                        <select id="payment-status">
-                            <option value="paid">✅ Đã thu tiền</option>
-                            <option value="debt">🚨 Còn Nợ Tiền</option>
+                        <label>Thanh Toán:</label>
+                        <select id="order-status">
+                            <option value="paid">Đã trả tiền đủ</option>
+                            <option value="debt">Ghi nợ (Chưa trả)</option>
                         </select>
                     </div>
                 </div>
-
-                <div class="calc-preview" id="calc-preview-box">
-                    Giá loại gà này: 0đ | 💰 TỔNG PHẢI THU: 0đ
-                </div>
-
-                <button type="submit" class="submit-btn">➕ Lưu Vào Sổ Sách</button>
+                <div class="calc-preview" id="order-preview">TỔNG TIỀN: 0đ</div>
+                <button type="submit" class="submit-btn">💾 Lưu Đơn Giao Hàng</button>
             </form>
         </div>
 
         <div class="admin-box">
-            <h2>📅 Danh Sách Đơn Giao Hàng & Trạng Thái Công Nợ</h2>
-            
-            <div class="dashboard-today" id="today-revenue-box">
-                Tổng số tiền dự kiến phải thu ngày hôm nay (Chưa tính nợ cũ): 0đ
-            </div>
-
-            <div class="table-responsive">
+            <h2>📊 Danh Sách Giao Hàng & Nợ</h2>
+            <div style="overflow-x:auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th>Ngày Giao</th>
-                            <th>Tên Khách Hàng</th>
-                            <th>Loại Gà</th>
-                            <th>Số Lượng</th>
+                            <th>Ngày</th>
+                            <th>Khách Hàng</th>
+                            <th>Mặt Hàng</th>
+                            <th>SL</th>
                             <th>Tổng Tiền</th>
                             <th>Trạng Thái</th>
-                            <th>Hành Động</th>
+                            <th>Xóa</th>
                         </tr>
                     </thead>
-                    <tbody id="delivery-table-body">
-                        </tbody>
+                    <tbody id="order-table-body"></tbody>
                 </table>
             </div>
         </div>
@@ -189,203 +132,201 @@
 
     <div id="tab-settings" class="tab-content">
         <div class="admin-box">
-            <h2>⚙️ Nơi Lưu Trữ Mức Giá Các Loại Gà</h2>
-            <p>Bạn đổi giá ở đây thì lúc tạo đơn hàng hệ thống sẽ tự áp dụng giá mới, không cần sửa code.</p>
-            <div class="form-group">
-                <div class="form-item">
-                    <label>Giá Gà Ta Thả Vườn (1 Kg):</label>
-                    <input type="number" id="price-ga-ta" value="150000">
+            <h2>➕ Thêm Loại Gà / Mặt Hàng Mới</h2>
+            <form onsubmit="addItem(event)">
+                <div class="form-group">
+                    <div class="form-item">
+                        <label>Tên Mặt Hàng:</label>
+                        <input type="text" id="new-item-name" required placeholder="Gà Tre, Gà Nòi...">
+                    </div>
+                    <div class="form-item">
+                        <label>Đơn Vị Tính:</label>
+                        <select id="new-item-unit">
+                            <option value="Con">Tính theo Con</option>
+                            <option value="Kg">Tính theo Kg</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label>Giá Bán (VNĐ):</label>
+                        <input type="number" id="new-item-price" required placeholder="Ví dụ: 150000">
+                    </div>
                 </div>
-                <div class="form-item">
-                    <label>Giá Gà Ác Tiềm (1 Con):</label>
-                    <input type="number" id="price-ga-ac" value="80000">
-                </div>
-            </div>
-            <button class="submit-btn" onclick="savePrices()">💾 Lưu Thay Đổi Giá</button>
+                <button type="submit" class="submit-btn" style="background:var(--accent)">➕ Thêm Vào Danh Mục</button>
+            </form>
+        </div>
+
+        <div class="admin-box">
+            <h2>Danh Mục Hiện Tại</h2>
+            <table id="settings-table">
+                <thead>
+                    <tr>
+                        <th>Tên Mặt Hàng</th>
+                        <th>Đơn Vị</th>
+                        <th>Giá</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="settings-table-body"></tbody>
+            </table>
         </div>
     </div>
 
-    <footer>
-        © 2026 Hệ thống quản lý Trại Gà Hạnh Phúc.
-    </footer>
-
     <script>
-        // Thiết lập ngày mặc định cho form là ngày hôm nay
-        document.getElementById('delivery-date').value = new Date().toISOString().split('T')[0];
+        // Dữ liệu ban đầu
+        let items = JSON.parse(localStorage.getItem('chickenItems')) || [
+            { id: 1, name: "Gà Ta", unit: "Kg", price: 150000 },
+            { id: 2, name: "Gà Ác", unit: "Con", price: 80000 }
+        ];
+        let orders = JSON.parse(localStorage.getItem('chickenOrders')) || [];
 
-        // 1. Quản lý cấu hình giá gà (Được lưu trong bộ nhớ máy)
-        let chickenPrices = JSON.parse(localStorage.getItem('chickenPrices')) || {
-            gata: { name: "Gà Ta Thả Vườn", price: 150000 },
-            gaac: { name: "Gà Ác Tiềm", price: 80000 }
-        };
-
-        // 2. Danh sách lưu trữ lịch sử giao hàng
-        let deliveries = JSON.parse(localStorage.getItem('deliveries')) || [];
-
-        // Chuyển đổi qua lại giữa các Tab chức năng
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if(tabName === 'shop') {
-                document.querySelector('[onclick="switchTab(\'shop\')"]').classList.add('active');
-                document.getElementById('tab-shop').classList.add('active');
-            } else if(tabName === 'admin') {
-                document.querySelector('[onclick="switchTab(\'admin\')"]').classList.add('active');
-                document.getElementById('tab-admin').classList.add('active');
-                renderDeliveries(); // Cập nhật lại danh sách nợ nần khi bấm vào quản lý
-            } else if(tabName === 'settings') {
-                document.querySelector('[onclick="switchTab(\'settings\')"]').classList.add('active');
-                document.getElementById('tab-settings').classList.add('active');
-            }
+        // Chuyển Tab
+        function switchTab(t) {
+            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${t}')"]`).classList.add('active');
+            document.getElementById(`tab-${t}`).classList.add('active');
+            if(t === 'admin') renderOrders();
+            if(t === 'settings') renderSettings();
+            if(t === 'shop') renderShop();
         }
 
-        // Cập nhật giá từ màn hình cấu hình
-        function savePrices() {
-            chickenPrices.gata.price = parseInt(document.getElementById('price-ga-ta').value) || 0;
-            chickenPrices.gaac.price = parseInt(document.getElementById('price-ga-ac').value) || 0;
-            localStorage.setItem('chickenPrices', JSON.stringify(chickenPrices));
-            
-            // Cập nhật hiển thị ra ngoài trang cửa hàng cho khách thấy luôn
-            initPriceOptions();
-            alert("Đã lưu bảng giá mới thành công!");
-        }
-
-        // Đổ danh sách loại gà vào ô chọn (Dropdown select)
-        function initPriceOptions() {
-            document.getElementById('view-price-ga-ta').innerText = chickenPrices.gata.price.toLocaleString('vi-VN') + "đ / kg";
-            document.getElementById('view-price-ga-ac').innerText = chickenPrices.gaac.price.toLocaleString('vi-VN') + "đ / con";
-
-            const select = document.getElementById('chicken-type');
-            select.innerHTML = `
-                <option value="gata">${chickenPrices.gata.name} (${chickenPrices.gata.price.toLocaleString('vi-VN')}đ)</option>
-                <option value="gaac">${chickenPrices.gaac.name} (${chickenPrices.gaac.price.toLocaleString('vi-VN')}đ)</option>
-            `;
-            
-            // Cập nhật luôn giá trị hiển thị ban đầu
-            document.getElementById('price-ga-ta').value = chickenPrices.gata.price;
-            document.getElementById('price-ga-ac').value = chickenPrices.gaac.price;
-            autoCalculateTotal();
-        }
-
-        // CHỨC NĂNG TỰ ĐỘNG TÍNH TOÁN TIỀN NGAY LÚC CHỌN VÀ NHẬP SỐ LƯỢNG
-        function autoCalculateTotal() {
-            const selectedType = document.getElementById('chicken-type').value;
-            const quantity = parseInt(document.getElementById('quantity').value) || 0;
-            const singlePrice = chickenPrices[selectedType].price;
-            
-            const total = singlePrice * quantity;
-            
-            // Hiện popup hiển thị giá trị thời gian thực bên dưới form
-            document.getElementById('calc-preview-box').innerHTML = `
-                💵 Đơn giá: ${singlePrice.toLocaleString('vi-VN')}đ | 💰 TỔNG SỐ TIỀN PHẢI THU: <span style="color:#e53935; font-size:1.2em;">${total.toLocaleString('vi-VN')}đ</span>
-            `;
-        }
-
-        // Lưu đơn hàng mới vào danh sách
-        function saveDelivery(e) {
+        // CẤU HÌNH: Thêm loại gà mới
+        function addItem(e) {
             e.preventDefault();
-            const selectedType = document.getElementById('chicken-type').value;
-            const quantity = parseInt(document.getElementById('quantity').value) || 0;
-            const singlePrice = chickenPrices[selectedType].price;
-
-            const newOrder = {
-                id: Date.now(), // Tạo mã đơn định danh bằng thời gian
-                date: document.getElementById('delivery-date').value,
-                customer: document.getElementById('cust-name').value,
-                chickenName: chickenPrices[selectedType].name,
-                quantity: quantity,
-                totalAmount: singlePrice * quantity,
-                status: document.getElementById('payment-status').value
+            const newItem = {
+                id: Date.now(),
+                name: document.getElementById('new-item-name').value,
+                unit: document.getElementById('new-item-unit').value,
+                price: parseInt(document.getElementById('new-item-price').value)
             };
-
-            deliveries.push(newOrder);
-            localStorage.setItem('deliveries', JSON.stringify(deliveries));
-            
-            // Reset lại form nhập liệu
-            document.getElementById('cust-name').value = '';
-            document.getElementById('quantity').value = '1';
-            autoCalculateTotal();
-            
-            renderDeliveries();
-            alert("Đã thêm lịch giao hàng mới thành công vào hệ thống!");
+            items.push(newItem);
+            localStorage.setItem('chickenItems', JSON.stringify(items));
+            e.target.reset();
+            renderSettings();
+            updateOrderOptions();
+            alert("Đã thêm loại gà mới!");
         }
 
-        // Đổi trạng thái nợ nần trực tiếp trên bảng
-        function toggleStatus(id) {
-            deliveries = deliveries.map(item => {
-                if(item.id === id) {
-                    item.status = item.status === 'paid' ? 'debt' : 'paid';
-                }
-                return item;
-            });
-            localStorage.setItem('deliveries', JSON.stringify(deliveries));
-            renderDeliveries();
-        }
-
-        // Xóa đơn hàng khỏi danh sách
-        function deleteOrder(id) {
-            if(confirm("Bạn có chắc muốn xóa lịch giao hàng này không?")) {
-                deliveries = deliveries.filter(item => item.id !== id);
-                localStorage.setItem('deliveries', JSON.stringify(deliveries));
-                renderDeliveries();
+        function deleteItem(id) {
+            if(confirm("Xóa loại gà này?")) {
+                items = items.filter(i => i.id !== id);
+                localStorage.setItem('chickenItems', JSON.stringify(items));
+                renderSettings();
+                updateOrderOptions();
             }
         }
 
-        // IN DANH SÁCH VÀ NỔI BẬT DANH SÁCH CÒN NỢ
-        function renderDeliveries() {
-            const tbody = document.getElementById('delivery-table-body');
-            tbody.innerHTML = '';
+        function renderSettings() {
+            const body = document.getElementById('settings-table-body');
+            body.innerHTML = items.map(i => `
+                <tr>
+                    <td><strong>${i.name}</strong></td>
+                    <td>${i.unit}</td>
+                    <td>${i.price.toLocaleString()}đ</td>
+                    <td><button class="del-btn" onclick="deleteItem(${i.id})">Xóa</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // QUẢN LÝ ĐƠN HÀNG
+        function updateOrderOptions() {
+            const select = document.getElementById('order-type');
+            select.innerHTML = items.map(i => `<option value="${i.id}">${i.name} (${i.price.toLocaleString()}đ/${i.unit})</option>`).join('');
+            updateUnitDisplay();
+        }
+
+        function updateUnitDisplay() {
+            const itemId = document.getElementById('order-type').value;
+            const item = items.find(i => i.id == itemId);
+            if(item) {
+                document.getElementById('label-qty').innerText = `Số lượng (${item.unit}):`;
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const itemId = document.getElementById('order-type').value;
+            const qty = parseFloat(document.getElementById('order-qty').value) || 0;
+            const item = items.find(i => i.id == itemId);
+            const total = item ? item.price * qty : 0;
+            document.getElementById('order-preview').innerText = `TỔNG TIỀN: ${total.toLocaleString()}đ`;
+        }
+
+        function saveOrder(e) {
+            e.preventDefault();
+            const itemId = document.getElementById('order-type').value;
+            const item = items.find(i => i.id == itemId);
+            const qty = parseFloat(document.getElementById('order-qty').value);
             
-            const todayStr = new Date().toISOString().split('T')[0];
-            let todayRevenue = 0;
+            const newOrder = {
+                id: Date.now(),
+                date: document.getElementById('order-date').value,
+                customer: document.getElementById('order-cust').value,
+                itemName: item.name,
+                unit: item.unit,
+                qty: qty,
+                total: item.price * qty,
+                status: document.getElementById('order-status').value
+            };
+            orders.push(newOrder);
+            localStorage.setItem('chickenOrders', JSON.stringify(orders));
+            renderOrders();
+            alert("Đã lưu đơn giao hàng!");
+        }
 
-            // Sắp xếp đơn hàng theo ngày mới nhất lên đầu
-            deliveries.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            deliveries.forEach(item => {
-                // Tính toán tổng số tiền thu được trong ngày hôm nay
-                if(item.date === todayStr) {
-                    todayRevenue += item.totalAmount;
-                }
-
-                // Kiểm tra xem có đang nợ không để áp dụng class làm nổi bật màu đỏ rực
-                const isDebt = item.status === 'debt';
-                const rowClass = isDebt ? 'class="row-debt"' : '';
-                const badge = isDebt ? '<span class="badge-debt">🚨 Còn Nợ</span>' : '<span class="badge-paid">✅ Đã Thu</span>';
-                const toggleBtnText = isDebt ? 'Thu Xong' : 'Báo Nợ';
-
-                tbody.innerHTML += `
-                    <tr ${rowClass}>
-                        <td>${formatDate(item.date)}</td>
-                        <td><strong>${item.customer}</strong></td>
-                        <td>${item.chickenName}</td>
-                        <td>${item.quantity}</td>
-                        <td><strong>${item.totalAmount.toLocaleString('vi-VN')}đ</strong></td>
-                        <td>${badge}</td>
-                        <td>
-                            <button class="action-btn" onclick="toggleStatus(${item.id})">${toggleBtnText}</button>
-                            <button class="del-btn" onclick="deleteOrder(${item.id})">Xóa</button>
-                        </td>
-                    </tr>
-                `;
+        function toggleOrder(id) {
+            orders = orders.map(o => {
+                if(o.id === id) o.status = o.status === 'paid' ? 'debt' : 'paid';
+                return o;
             });
-
-            // Hiển thị tổng tiền phải thu trong ngày hôm nay lên thanh thông báo
-            document.getElementById('today-revenue-box').innerHTML = `
-                📅 Hôm nay (${formatDate(todayStr)}): Dự kiến thu tổng cộng <span style="color:#d32f2f; font-size: 1.3em;">${todayRevenue.toLocaleString('vi-VN')}đ</span> từ các đơn giao trong ngày.
-            `;
+            localStorage.setItem('chickenOrders', JSON.stringify(orders));
+            renderOrders();
         }
 
-        // Hàm hỗ trợ đổi định dạng ngày từ năm-tháng-ngày thành ngày-tháng-năm cho dễ xem
-        function formatDate(dateStr) {
-            if(!dateStr) return '';
-            const p = dateStr.split('-');
-            return `${p[2]}/${p[1]}/${p[0]}`;
+        function deleteOrder(id) {
+            if(confirm("Xóa lịch sử giao này?")) {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('chickenOrders', JSON.stringify(orders));
+                renderOrders();
+            }
         }
 
-        // Chạy khởi tạo giá khi mở trang web lên lần đầu
-        initPriceOptions();
+        function renderOrders() {
+            const body = document.getElementById('order-table-body');
+            orders.sort((a,b) => new Date(b.date) - new Date(a.date));
+            body.innerHTML = orders.map(o => `
+                <tr class="${o.status === 'debt' ? 'row-debt' : ''}">
+                    <td>${o.date.split('-').reverse().join('/')}</td>
+                    <td>${o.customer}</td>
+                    <td>${o.itemName}</td>
+                    <td>${o.qty} ${o.unit}</td>
+                    <td>${o.total.toLocaleString()}đ</td>
+                    <td>
+                        <span class="badge ${o.status === 'paid' ? 'bg-paid' : 'bg-debt'}" onclick="toggleOrder(${o.id})" style="cursor:pointer">
+                            ${o.status === 'paid' ? 'Đã trả' : 'CÒN NỢ'}
+                        </span>
+                    </td>
+                    <td><button class="del-btn" onclick="deleteOrder(${o.id})">x</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // CỬA HÀNG
+        function renderShop() {
+            const list = document.getElementById('shop-list');
+            list.innerHTML = items.map(i => `
+                <div class="card">
+                    <div style="font-size:3em">${i.unit === 'Con' ? '🐥' : '🐓'}</div>
+                    <h3>${i.name}</h3>
+                    <div class="price-tag">${i.price.toLocaleString()}đ <small style="font-size:0.5em">/${i.unit}</small></div>
+                    <button class="submit-btn" style="width:100%" onclick="alert('Vui lòng gọi chủ trại để đặt gà!')">Liên Hệ Đặt Gà</button>
+                </div>
+            `).join('');
+        }
+
+        // Khởi tạo
+        document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
+        updateOrderOptions();
+        renderShop();
     </script>
 </body>
 </html>
