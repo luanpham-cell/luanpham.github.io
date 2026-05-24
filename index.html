@@ -3,127 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Trại Gà Thông Minh</title>
+    <title>Quản Lý Trại Gà - Gia Đình</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2e7d32; --accent: #f9a825; --danger: #d32f2f;
-            --danger-bg: #ffebee; --bg: #f4f7f6; --text: #333;
-        }
+        :root { --primary: #2e7d32; --accent: #f9a825; --danger: #d32f2f; --bg: #f4f7f6; --text: #333; }
         * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
-        body { background-color: var(--bg); margin: 0; color: var(--text); padding-bottom: 60px; }
-        header {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-            color: white; text-align: center; padding: 30px 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+        body { background-color: var(--bg); margin: 0; padding-bottom: 60px; }
+        header { background: linear-gradient(135deg, #4caf50, #2e7d32); color: white; text-align: center; padding: 20px; }
+        
         .nav-tabs { display: flex; justify-content: center; background: #fff; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tab-btn {
-            padding: 15px 20px; border: none; background: none; font-size: 1em; font-weight: bold;
-            cursor: pointer; color: #666; border-bottom: 4px solid transparent; transition: 0.3s;
-        }
+        .tab-btn { padding: 15px; border: none; background: none; font-weight: bold; cursor: pointer; color: #666; border-bottom: 4px solid transparent; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .tab-content { display: none; max-width: 1100px; margin: 25px auto; padding: 0 15px; }
-        .tab-content.active { display: block; }
+        
+        /* MẶC ĐỊNH GIẤU TAB CẤU HÌNH */
+        #btn-settings, #tab-settings { display: none; }
 
-        /* Style cho phần Quản lý */
+        .tab-content { display: none; max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        .tab-content.active { display: block; }
         .admin-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .admin-box h2 { margin-top: 0; color: var(--primary); font-size: 1.3em; border-left: 5px solid var(--primary); padding-left: 10px; }
+        
         .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-item { display: flex; flex-direction: column; }
-        .form-item label { font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size:1em; }
+        .submit-btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size:1em;}
         
-        .submit-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .calc-preview { background: #fffde7; padding: 15px; border-radius: 8px; border: 1px dashed var(--accent); margin: 10px 0; font-weight: bold; text-align: center; }
-
-        /* Bảng dữ liệu */
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.95em; }
-        th { background: #f8f9fa; }
-        .row-debt { background-color: var(--danger-bg); color: var(--danger); font-weight: bold; }
-        .badge { padding: 4px 8px; border-radius: 5px; font-size: 0.8em; color: white; font-weight: bold; }
-        .bg-paid { background: var(--primary); }
-        .bg-debt { background: var(--danger); }
-
-        /* Store Cards */
-        .grid-layout { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; border-radius: 20px; padding: 20px; width: 280px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .price-tag { color: var(--danger); font-size: 1.4em; font-weight: 900; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+        .row-debt { background-color: #ffeded; color: #d32f2f; }
         
-        .del-btn { background: #ffeded; color: #d32f2f; border: 1px solid #ffcdd2; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; }
-        .status-btn { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; }
+        /* Box Giỏ hàng */
+        .cart-box { background: #e8f5e9; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed var(--primary); }
+        .cart-item { display: flex; justify-content: space-between; background: white; padding: 8px; margin-top: 5px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🐔 Trại Gà Hạnh Phúc</h1>
-        <p>Hệ thống Quản lý Bán lẻ & Công nợ</p>
+        <h1 onclick="secretClick()" style="cursor: pointer; margin:0;">🐔 Trại Gà Hạnh Phúc</h1>
+        <p style="margin:5px 0 0 0; opacity:0.9;">Phiên bản dành cho Gia Đình</p>
     </header>
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('shop')">🏠 Cửa Hàng</button>
         <button class="tab-btn" onclick="switchTab('admin')">📋 Giao Hàng & Nợ</button>
-        <button class="tab-btn" onclick="switchTab('settings')">⚙️ Cấu Hình Gà</button>
+        <button id="btn-settings" class="tab-btn" onclick="switchTab('settings')">⚙️ Cấu Hình (Admin)</button>
     </div>
 
     <div id="tab-shop" class="tab-content active">
-        <div id="shop-list" class="grid-layout">
-            </div>
+        <div id="shop-list" style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;"></div>
     </div>
 
     <div id="tab-admin" class="tab-content">
         <div class="admin-box">
-            <h2>📝 Lên Lịch Giao Hàng</h2>
+            <h3 style="color:var(--primary); margin-top:0;">📝 Lên Đơn Giao Hàng</h3>
+            
+            <div class="form-group">
+                <div class="form-item"><label>Khách Hàng:</label><input type="text" id="order-cust" placeholder="Nhập tên khách..." required></div>
+                <div class="form-item"><label>Ngày Giao:</label><input type="date" id="order-date" required></div>
+            </div>
+
+            <div class="cart-box">
+                <label style="font-weight:bold; color:var(--primary);">🛒 Thêm món vào đơn:</label>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <select id="order-type" style="flex:2; min-width:150px;"></select>
+                    <input type="number" id="order-qty" value="1" step="0.1" style="flex:1; min-width:80px;" placeholder="Số lượng">
+                    <button type="button" onclick="addToCart()" style="background:#0288d1; color:white; border:none; border-radius:8px; padding:10px 15px; cursor:pointer; font-weight:bold;">➕ Thêm</button>
+                </div>
+                
+                <div id="cart-list" style="margin-top: 15px; font-size: 0.95em;">
+                    <i style="color:#666;">Chưa có món nào trong đơn...</i>
+                </div>
+            </div>
+
             <form onsubmit="saveOrder(event)">
                 <div class="form-group">
-                    <div class="form-item">
-                        <label>Tên Khách Hàng:</label>
-                        <input type="text" id="order-cust" required placeholder="Ví dụ: Chú Bảy">
-                    </div>
-                    <div class="form-item">
-                        <label>Ngày Giao:</label>
-                        <input type="date" id="order-date" required>
-                    </div>
+                    <div class="form-item"><label>Thanh Toán:</label><select id="order-status"><option value="paid">✅ Đã Trả Đủ Tiền</option><option value="debt">🚨 Ghi Nợ (Chưa trả)</option></select></div>
                 </div>
-                <div class="form-group">
-                    <div class="form-item">
-                        <label>Chọn Loại Gà:</label>
-                        <select id="order-type" onchange="updateUnitDisplay()"></select>
-                    </div>
-                    <div class="form-item">
-                        <label id="label-qty">Số lượng (Con):</label>
-                        <input type="number" id="order-qty" step="0.1" value="1" oninput="calculateTotal()">
-                    </div>
-                    <div class="form-item">
-                        <label>Thanh Toán:</label>
-                        <select id="order-status">
-                            <option value="paid">Đã trả tiền đủ</option>
-                            <option value="debt">Ghi nợ (Chưa trả)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="calc-preview" id="order-preview">TỔNG TIỀN: 0đ</div>
-                <button type="submit" class="submit-btn">💾 Lưu Đơn Giao Hàng</button>
+                <div id="order-total" style="font-weight: 900; margin: 15px 0; color: var(--danger); font-size: 1.4em; text-align:center;">TỔNG ĐƠN: 0đ</div>
+                <button type="submit" class="submit-btn" style="width:100%; font-size:1.1em; padding:15px;">💾 CHỐT ĐƠN & LƯU SỔ</button>
             </form>
         </div>
 
         <div class="admin-box">
-            <h2>📊 Danh Sách Giao Hàng & Nợ</h2>
+            <h3 style="color:var(--primary); margin-top:0;">📊 Danh Sách Giao Hàng & Nợ</h3>
             <div style="overflow-x:auto;">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Ngày</th>
-                            <th>Khách Hàng</th>
-                            <th>Mặt Hàng</th>
-                            <th>SL</th>
-                            <th>Tổng Tiền</th>
-                            <th>Trạng Thái</th>
-                            <th>Xóa</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Ngày</th><th>Khách</th><th>Mặt Hàng</th><th>SL</th><th>Tổng Tiền</th><th>Trạng Thái</th><th>Xóa</th></tr></thead>
                     <tbody id="order-table-body"></tbody>
                 </table>
             </div>
@@ -132,54 +97,45 @@
 
     <div id="tab-settings" class="tab-content">
         <div class="admin-box">
-            <h2>➕ Thêm Loại Gà / Mặt Hàng Mới</h2>
+            <h3>⚙️ Quản Lý Loại Gà & Giá (Chỉ Admin)</h3>
             <form onsubmit="addItem(event)">
                 <div class="form-group">
-                    <div class="form-item">
-                        <label>Tên Mặt Hàng:</label>
-                        <input type="text" id="new-item-name" required placeholder="Gà Tre, Gà Nòi...">
-                    </div>
-                    <div class="form-item">
-                        <label>Đơn Vị Tính:</label>
-                        <select id="new-item-unit">
-                            <option value="Con">Tính theo Con</option>
-                            <option value="Kg">Tính theo Kg</option>
-                        </select>
-                    </div>
-                    <div class="form-item">
-                        <label>Giá Bán (VNĐ):</label>
-                        <input type="number" id="new-item-price" required placeholder="Ví dụ: 150000">
-                    </div>
+                    <input type="text" id="new-name" placeholder="Tên Gà" required>
+                    <select id="new-unit"><option value="Con">Tính theo Con</option><option value="Kg">Tính theo Kg</option></select>
+                    <input type="number" id="new-price" placeholder="Giá tiền" required>
                 </div>
-                <button type="submit" class="submit-btn" style="background:var(--accent)">➕ Thêm Vào Danh Mục</button>
+                <button type="submit" class="submit-btn" style="background: var(--accent);">➕ Thêm Vào Danh Mục</button>
             </form>
-        </div>
-
-        <div class="admin-box">
-            <h2>Danh Mục Hiện Tại</h2>
-            <table id="settings-table">
-                <thead>
-                    <tr>
-                        <th>Tên Mặt Hàng</th>
-                        <th>Đơn Vị</th>
-                        <th>Giá</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
+            <table style="margin-top: 20px;">
                 <tbody id="settings-table-body"></tbody>
             </table>
+            <button onclick="lockSettings()" style="margin-top:20px; border:none; color:grey; background:none; cursor:pointer;">🔐 Khóa lại và ẩn đi</button>
         </div>
     </div>
 
     <script>
-        // Dữ liệu ban đầu
-        let items = JSON.parse(localStorage.getItem('chickenItems')) || [
-            { id: 1, name: "Gà Ta", unit: "Kg", price: 150000 },
-            { id: 2, name: "Gà Ác", unit: "Con", price: 80000 }
-        ];
+        // Dữ liệu
+        let items = JSON.parse(localStorage.getItem('chickenItems')) || [{id:1, name:"Gà Ta", unit:"Kg", price:150000}, {id:2, name:"Gà Ác", unit:"Con", price:80000}];
         let orders = JSON.parse(localStorage.getItem('chickenOrders')) || [];
+        
+        // Giỏ hàng tạm thời cho 1 đơn
+        let currentCart = [];
+        let clickCount = 0;
 
-        // Chuyển Tab
+        // BẢO MẬT ADMIN
+        function secretClick() {
+            clickCount++;
+            if (clickCount === 5) {
+                let pass = prompt("Nhập mật mã Admin để mở Cấu Hình:");
+                if (pass === "1234") { 
+                    document.getElementById('btn-settings').style.display = 'block';
+                    alert("Đã mở khóa Tab Cấu Hình!");
+                } else { alert("Sai mật mã!"); }
+                clickCount = 0;
+            }
+        }
+        function lockSettings() { document.getElementById('btn-settings').style.display = 'none'; switchTab('shop'); }
+
         function switchTab(t) {
             document.querySelectorAll('.tab-btn, .tab-content').forEach(el => el.classList.remove('active'));
             document.querySelector(`[onclick="switchTab('${t}')"]`).classList.add('active');
@@ -189,143 +145,121 @@
             if(t === 'shop') renderShop();
         }
 
-        // CẤU HÌNH: Thêm loại gà mới
-        function addItem(e) {
-            e.preventDefault();
-            const newItem = {
-                id: Date.now(),
-                name: document.getElementById('new-item-name').value,
-                unit: document.getElementById('new-item-unit').value,
-                price: parseInt(document.getElementById('new-item-price').value)
-            };
-            items.push(newItem);
-            localStorage.setItem('chickenItems', JSON.stringify(items));
-            e.target.reset();
-            renderSettings();
-            updateOrderOptions();
-            alert("Đã thêm loại gà mới!");
+        // --- CHỨC NĂNG GIỎ HÀNG (NHIỀU MÓN) ---
+        function addToCart() {
+            const id = document.getElementById('order-type').value;
+            const item = items.find(i => i.id == id);
+            const qty = parseFloat(document.getElementById('order-qty').value);
+            
+            if(!item || isNaN(qty) || qty <= 0) return alert("Vui lòng nhập số lượng hợp lệ!");
+
+            currentCart.push({ name: item.name, qty: qty, unit: item.unit, price: item.price, total: item.price * qty });
+            document.getElementById('order-qty').value = 1; // reset số lượng
+            renderCartUI();
         }
 
-        function deleteItem(id) {
-            if(confirm("Xóa loại gà này?")) {
-                items = items.filter(i => i.id !== id);
-                localStorage.setItem('chickenItems', JSON.stringify(items));
-                renderSettings();
-                updateOrderOptions();
+        function removeCartItem(index) {
+            currentCart.splice(index, 1);
+            renderCartUI();
+        }
+
+        function renderCartUI() {
+            const list = document.getElementById('cart-list');
+            if (currentCart.length === 0) {
+                list.innerHTML = "<i style='color:#666;'>Chưa có món nào trong đơn...</i>";
+                document.getElementById('order-total').innerText = "TỔNG ĐƠN: 0đ";
+                return;
             }
-        }
 
-        function renderSettings() {
-            const body = document.getElementById('settings-table-body');
-            body.innerHTML = items.map(i => `
-                <tr>
-                    <td><strong>${i.name}</strong></td>
-                    <td>${i.unit}</td>
-                    <td>${i.price.toLocaleString()}đ</td>
-                    <td><button class="del-btn" onclick="deleteItem(${i.id})">Xóa</button></td>
-                </tr>
+            list.innerHTML = currentCart.map((c, idx) => `
+                <div class="cart-item">
+                    <span><b>${c.name}</b> (${c.qty} ${c.unit})</span>
+                    <span>${c.total.toLocaleString()}đ <button onclick="removeCartItem(${idx})" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold;">X</button></span>
+                </div>
             `).join('');
-        }
 
-        // QUẢN LÝ ĐƠN HÀNG
-        function updateOrderOptions() {
-            const select = document.getElementById('order-type');
-            select.innerHTML = items.map(i => `<option value="${i.id}">${i.name} (${i.price.toLocaleString()}đ/${i.unit})</option>`).join('');
-            updateUnitDisplay();
-        }
-
-        function updateUnitDisplay() {
-            const itemId = document.getElementById('order-type').value;
-            const item = items.find(i => i.id == itemId);
-            if(item) {
-                document.getElementById('label-qty').innerText = `Số lượng (${item.unit}):`;
-            }
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            const itemId = document.getElementById('order-type').value;
-            const qty = parseFloat(document.getElementById('order-qty').value) || 0;
-            const item = items.find(i => i.id == itemId);
-            const total = item ? item.price * qty : 0;
-            document.getElementById('order-preview').innerText = `TỔNG TIỀN: ${total.toLocaleString()}đ`;
+            const sum = currentCart.reduce((acc, curr) => acc + curr.total, 0);
+            document.getElementById('order-total').innerText = `TỔNG ĐƠN: ${sum.toLocaleString()}đ`;
         }
 
         function saveOrder(e) {
             e.preventDefault();
-            const itemId = document.getElementById('order-type').value;
-            const item = items.find(i => i.id == itemId);
-            const qty = parseFloat(document.getElementById('order-qty').value);
-            
+            const cust = document.getElementById('order-cust').value.trim();
+            if(!cust) return alert("Vui lòng nhập tên khách hàng!");
+            if(currentCart.length === 0) return alert("Đơn hàng đang trống! Vui lòng chọn gà và bấm nút '➕ Thêm' trước khi chốt đơn.");
+
+            // Gộp tên các món và số lượng lại bằng thẻ <br> để xuống dòng trong bảng
+            const namesCombined = currentCart.map(c => c.name).join('<br>');
+            const qtysCombined = currentCart.map(c => `${c.qty} ${c.unit}`).join('<br>');
+            const totalSum = currentCart.reduce((acc, curr) => acc + curr.total, 0);
+
             const newOrder = {
                 id: Date.now(),
                 date: document.getElementById('order-date').value,
-                customer: document.getElementById('order-cust').value,
-                itemName: item.name,
-                unit: item.unit,
-                qty: qty,
-                total: item.price * qty,
+                customer: cust,
+                itemName: namesCombined, // Lưu chuỗi đã gộp
+                qty_unit: qtysCombined,  // Lưu chuỗi đã gộp
+                total: totalSum,
                 status: document.getElementById('order-status').value
             };
+
             orders.push(newOrder);
             localStorage.setItem('chickenOrders', JSON.stringify(orders));
+            
+            // Xóa rỗng giỏ hàng sau khi lưu
+            currentCart = [];
+            renderCartUI();
+            document.getElementById('order-cust').value = '';
             renderOrders();
-            alert("Đã lưu đơn giao hàng!");
+            alert("Đã chốt đơn và lưu vào sổ thành công!");
         }
 
-        function toggleOrder(id) {
-            orders = orders.map(o => {
-                if(o.id === id) o.status = o.status === 'paid' ? 'debt' : 'paid';
-                return o;
-            });
-            localStorage.setItem('chickenOrders', JSON.stringify(orders));
-            renderOrders();
-        }
-
-        function deleteOrder(id) {
-            if(confirm("Xóa lịch sử giao này?")) {
-                orders = orders.filter(o => o.id !== id);
-                localStorage.setItem('chickenOrders', JSON.stringify(orders));
-                renderOrders();
-            }
-        }
-
+        // --- RENDER BẢNG DỮ LIỆU ---
         function renderOrders() {
             const body = document.getElementById('order-table-body');
             orders.sort((a,b) => new Date(b.date) - new Date(a.date));
-            body.innerHTML = orders.map(o => `
+            body.innerHTML = orders.map(o => {
+                // Logic hỗ trợ các đơn hàng cũ (lúc chưa có tính năng giỏ hàng)
+                let displayQty = o.qty_unit ? o.qty_unit : (o.qty + " " + o.unit);
+                
+                return `
                 <tr class="${o.status === 'debt' ? 'row-debt' : ''}">
                     <td>${o.date.split('-').reverse().join('/')}</td>
-                    <td>${o.customer}</td>
+                    <td style="font-weight:bold;">${o.customer}</td>
                     <td>${o.itemName}</td>
-                    <td>${o.qty} ${o.unit}</td>
-                    <td>${o.total.toLocaleString()}đ</td>
-                    <td>
-                        <span class="badge ${o.status === 'paid' ? 'bg-paid' : 'bg-debt'}" onclick="toggleOrder(${o.id})" style="cursor:pointer">
-                            ${o.status === 'paid' ? 'Đã trả' : 'CÒN NỢ'}
-                        </span>
-                    </td>
-                    <td><button class="del-btn" onclick="deleteOrder(${o.id})">x</button></td>
+                    <td>${displayQty}</td>
+                    <td style="font-weight:bold;">${o.total.toLocaleString()}đ</td>
+                    <td><button onclick="togglePay(${o.id})" style="border:none; border-radius:5px; padding:6px; background:${o.status==='paid'?'#2e7d32':'#d32f2f'}; color:white; cursor:pointer; width:80px; font-weight:bold;">
+                        ${o.status === 'paid' ? 'Đã thu' : 'CÒN NỢ'}
+                    </button></td>
+                    <td><button onclick="deleteOrder(${o.id})" style="border:none; color:red; background:none; cursor:pointer; font-weight:bold; font-size:1.2em;">×</button></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // CỬA HÀNG
+        // Các hàm phụ trợ
+        function togglePay(id) { orders = orders.map(o => { if(o.id === id) o.status = (o.status==='paid'?'debt':'paid'); return o; }); localStorage.setItem('chickenOrders', JSON.stringify(orders)); renderOrders(); }
+        function deleteOrder(id) { if(confirm("Bạn có chắc muốn xóa đơn này khỏi sổ?")) { orders = orders.filter(o => o.id !== id); localStorage.setItem('chickenOrders', JSON.stringify(orders)); renderOrders(); } }
+        
         function renderShop() {
-            const list = document.getElementById('shop-list');
-            list.innerHTML = items.map(i => `
-                <div class="card">
-                    <div style="font-size:3em">${i.unit === 'Con' ? '🐥' : '🐓'}</div>
-                    <h3>${i.name}</h3>
-                    <div class="price-tag">${i.price.toLocaleString()}đ <small style="font-size:0.5em">/${i.unit}</small></div>
-                    <button class="submit-btn" style="width:100%" onclick="alert('Vui lòng gọi chủ trại để đặt gà!')">Liên Hệ Đặt Gà</button>
+            document.getElementById('shop-list').innerHTML = items.map(i => `
+                <div style="background:white; padding:20px; border-radius:15px; width:220px; text-align:center; box-shadow:0 5px 10px rgba(0,0,0,0.05); border-top: 5px solid var(--primary);">
+                    <h2 style="margin-top:0;">${i.name}</h2>
+                    <p style="color:var(--danger); font-weight:900; font-size:1.4em; margin:10px 0;">${i.price.toLocaleString()}đ</p>
+                    <p style="color:#666; margin:0;">Tính theo: <b>${i.unit}</b></p>
                 </div>
             `).join('');
         }
 
+        function addItem(e) { e.preventDefault(); items.push({ id: Date.now(), name: document.getElementById('new-name').value, unit: document.getElementById('new-unit').value, price: parseInt(document.getElementById('new-price').value) }); localStorage.setItem('chickenItems', JSON.stringify(items)); renderSettings(); updateOptions(); alert("Đã thêm thành công!"); }
+        function renderSettings() { document.getElementById('settings-table-body').innerHTML = items.map(i => `<tr><td><b>${i.name}</b></td><td>${i.unit}</td><td>${i.price.toLocaleString()}đ</td><td><button onclick="deleteItem(${i.id})" style="color:white; background:red; padding:5px 10px; border-radius:5px; border:none; cursor:pointer">Xóa</button></td></tr>`).join(''); }
+        function deleteItem(id) { if(confirm("Xóa mặt hàng này?")) { items = items.filter(i => i.id !== id); localStorage.setItem('chickenItems', JSON.stringify(items)); renderSettings(); updateOptions(); } }
+        function updateOptions() { document.getElementById('order-type').innerHTML = items.map(i => `<option value="${i.id}">${i.name} (${i.price.toLocaleString()}đ/${i.unit})</option>`).join(''); }
+
         // Khởi tạo
         document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
-        updateOrderOptions();
+        updateOptions();
         renderShop();
     </script>
 </body>
